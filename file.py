@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 buzzer = Buzzer(27)           # Buzzer connected to GPIO 27
 pir = MotionSensor(17)        # PIR sensor on GPIO 17
 
-API_URL = "https://iot-api-nytn.onrender.com/motion/saveDoc"
+API_URL = "https://iot-api-nytn.onrender.com/api/motion/saveDoc"
 # API_URL = "http://localhost:5000/api/motion/saveDoc"
 
 # Function to get approximate location from IP
