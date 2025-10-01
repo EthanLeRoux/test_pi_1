@@ -5,27 +5,27 @@ require("dotenv").config();
 const router = express.Router();
 
 // MongoDB connection
-const uri = process.env.MONGO_URI; // store your Mongo URI in .env
+const uri = process.env.MONGO_URI; // Mongo URI in .env
 const client = new MongoClient(uri, { useUnifiedTopology: true });
-const dbName = "iot"; // your database name
+const dbName = "iot"; // database name
 let motionsCollection;
 
-// Connect to MongoDB once and reuse the collection
+// Connect to MongoDB
 async function connectMongo() {
     if (!motionsCollection) {
+        console.log("ℹ️ Connecting to Mongo...");
         await client.connect();
         const db = client.db(dbName);
         motionsCollection = db.collection("motions");
-        console.log("✅ Connected to MongoDB");
+        console.log("✅ Connected to MongoDB and ready to use 'motions' collection");
     }
+    return motionsCollection;
 }
 
 // POST route to save a motion document
 router.post("/saveDoc", async (req, res) => {
     try {
-        if (!motionsCollection) {
-            await connectMongo(); // ensure DB connection
-        }
+        const motions = await connectMongo(); // ensures collection is ready
 
         const { motionDuration, motionDatetime, motionLocation } = req.body;
 
@@ -48,7 +48,7 @@ router.post("/saveDoc", async (req, res) => {
             },
         };
 
-        const result = await motionsCollection.insertOne(doc);
+        const result = await motions.insertOne(doc);
         res.status(201).json({ message: "Motion saved", id: result.insertedId });
     } catch (error) {
         console.error("Error saving motion:", error);
@@ -59,24 +59,19 @@ router.post("/saveDoc", async (req, res) => {
 // GET route to fetch all motion documents
 router.get("/all", async (req, res) => {
     try {
-        if (!motionsCollection) {
-            await connectMongo(); // ensure DB connection
-        }
+        const motions = await connectMongo();
 
-        const motions = await motionsCollection
-            .find()
-            .sort({ motionDatetime: -1 })
-            .toArray();
+        const data = await motions.find().sort({ motionDatetime: -1 }).toArray();
 
-        if (motions.length === 0) {
+        if (data.length === 0) {
             return res.status(404).json({ message: "No motion records found" });
         }
 
-        res.status(200).json(motions);
+        res.status(200).json(data);
     } catch (error) {
         console.error("Error fetching motions:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
 
-module.exports = router;
+module.exports = { router, connectMongo };

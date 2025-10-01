@@ -1,26 +1,35 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const motionRoutes = require('./routes/motionroutes');
+const { router: motionRoutes, connectMongo } = require('./routes/motionroutes');
 
-//load env vars
+// Load env vars
 dotenv.config();
 
 const app = express();
 
-// app.use(cors({
-//     origin: `${process.env.CORS_ALLOWED_URL}`,
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//     credentials: true
-// }));
+// Middleware
+app.use(cors({
+    origin: process.env.CORS_ALLOWED_URL || '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
+app.use(express.json()); // JSON body parsing
 
-app.use(express.json());
+// Routes will be mounted after DB is ready
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`Server started on port ${PORT}`);
-})
-app.use(bodyParser.json());
-app.use('/api/motion',motionRoutes);
+(async () => {
+    try {
+        await connectMongo(); // ensure MongoDB is connected before routes are used
+        app.use('/api/motion', motionRoutes);
+
+        app.listen(PORT, () => {
+            console.log(`✅ Server started on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error("❌ Failed to start server:", err);
+        process.exit(1); // exit if DB connection fails
+    }
+})();
