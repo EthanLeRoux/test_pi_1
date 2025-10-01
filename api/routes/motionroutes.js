@@ -16,14 +16,17 @@ async function connectMongo() {
         await client.connect();
         const db = client.db(dbName);
         motionsCollection = db.collection("motions");
-        console.log("Connected to MongoDB");
+        console.log("✅ Connected to MongoDB");
     }
 }
-connectMongo().catch(console.error);
 
 // POST route to save a motion document
 router.post("/saveDoc", async (req, res) => {
     try {
+        if (!motionsCollection) {
+            await connectMongo(); // ensure DB connection
+        }
+
         const { motionDuration, motionDatetime, motionLocation } = req.body;
 
         // Basic validation
@@ -56,6 +59,10 @@ router.post("/saveDoc", async (req, res) => {
 // GET route to fetch all motion documents
 router.get("/all", async (req, res) => {
     try {
+        if (!motionsCollection) {
+            await connectMongo(); // ensure DB connection
+        }
+
         const motions = await motionsCollection
             .find()
             .sort({ motionDatetime: -1 })
