@@ -10,7 +10,7 @@ function App() {
   useEffect(() => {
     const fetchMotions = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/motion/all')
+        const response = await fetch('https://iot-api-nytn.onrender.com/api/motion/all')
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
