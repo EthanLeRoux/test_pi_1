@@ -13,11 +13,11 @@ let motionsCollection;
 // Connect to MongoDB
 async function connectMongo() {
     if (!motionsCollection) {
-        console.log("ℹ️ Connecting to Mongo...");
+        console.log("Connecting to Mongo...");
         await client.connect();
         const db = client.db(dbName);
         motionsCollection = db.collection("motions");
-        console.log("✅ Connected to MongoDB and ready to use 'motions' collection");
+        console.log("Connected to MongoDB and ready to use 'motions' collection");
     }
     return motionsCollection;
 }

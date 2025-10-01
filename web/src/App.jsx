@@ -5,6 +5,7 @@ function App() {
   const [motions, setMotions] = useState([]) // store motions
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [initialLoading, setInitialLoading] = useState(true)
 
   // Fetch motion records from API
   useEffect(() => {
@@ -16,15 +17,24 @@ function App() {
         }
         const data = await response.json()
         setMotions(data)
+        setError(null) // Clear error on successful fetch
       } catch (err) {
         console.error('Error fetching motions:', err)
         setError(err.message)
       } finally {
         setLoading(false)
+        setInitialLoading(false)
       }
     }
 
+    // Initial fetch
     fetchMotions()
+
+    // Set up polling every 5 seconds
+    const intervalId = setInterval(fetchMotions, 5000)
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId)
   }, [])
 
   return (
@@ -34,7 +44,7 @@ function App() {
       </nav>
 
       <div className="container">
-        {loading && <p>Loading motions...</p>}
+        {initialLoading && <p>Loading motions...</p>}
         {error && <p className="error">Error: {error}</p>}
         {!loading && !error && motions.length === 0 && <p>No motion records found.</p>}
         <div className="cards">
@@ -48,7 +58,8 @@ function App() {
                     <strong>Duration:</strong> {motion.motionDuration}s
                   </p>
                   <p>
-                    <strong>Date:</strong> {new Date(motion.motionDatetime).toLocaleString()}
+                    <strong>Date:</strong>{' '}
+                    {new Date(motion.motionDatetime).toLocaleString()}
                   </p>
                   <p>
                     <strong>Location:</strong> Lat {motion.motionLocation.lat}, Long {motion.motionLocation.long}

@@ -26,10 +26,10 @@ const PORT = process.env.PORT || 5000;
         app.use('/api/motion', motionRoutes);
 
         app.listen(PORT, () => {
-            console.log(`✅ Server started on port ${PORT}`);
+            console.log(`Server started on port ${PORT}`);
         });
     } catch (err) {
-        console.error("❌ Failed to start server:", err);
+        console.error("Failed to start server:", err);
         process.exit(1); // exit if DB connection fails
     }
 })();
